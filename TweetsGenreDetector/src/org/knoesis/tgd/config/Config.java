@@ -30,6 +30,10 @@ public class Config {
 		Config.rootFolder = rootFolder;
 	}
 	
+	/**
+	 * This method is used to load the properties from the user
+	 * defined propertied file.
+	 */
 	public static void load(){
 		try {
 			properties.load(new FileInputStream(rootFolder + "/" + propertiesFile));
@@ -40,7 +44,14 @@ public class Config {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+	}
+	
+	public static void main(String[] args) {
+		Config.load();
+		String keywords = Config.properties.getProperty("keywords");
+		String twitterusername = Config.properties.getProperty("twitterusername");
+		System.out.println("The keywords are "+ keywords);
+		System.out.println("The username is "+ twitterusername);
 		
 	}
 }
