@@ -3,7 +3,9 @@ package org.knoesis.tgd.config;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.Properties;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -73,12 +75,49 @@ public class ConfigManager {
 		return instance;
 	}
 	
+	/**
+	 * Returns the set of events that has to be crawled by the crawler.
+	 * 
+	 * @return
+	 */
+	public Set<String> getEvents() {
+		String events = properties.getProperty("events");
+		return commaSeperatedToSet(events);
+	}
+	
+	/**
+	 * Returns the keywords for the particluar event from the configuration file
+	 * 
+	 * @param event
+	 * @return
+	 */
+	public Set<String> getKeywordsForEvent(String event) {
+		String keywords = properties.getProperty("event." + event.trim());
+		return commaSeperatedToSet(keywords);
+	}
+
+	/**
+	 * transforms the comma seperated words into a set
+	 * 
+	 * @param csw
+	 * @return
+	 */
+	private Set<String> commaSeperatedToSet(String csw) {
+		String[] wordArray = csw.split(",");
+		Set<String> wordSet = new HashSet<String>();
+		// trimming the elements of the array
+		for (int i = 0; i < wordArray.length; i++) {
+			wordSet.add(wordArray[i].trim());
+		}
+		return wordSet;
+	}
 
 	public static void main(String[] args) {
-		Properties props = ConfigManager.getInstance().getProperties();
-		String keywords = props.getProperty("keywords");
+		ConfigManager manager = ConfigManager.getInstance();
+		Properties props = manager.getProperties();
 		String twitterusername = props.getProperty("twitterusername");
-		System.out.println("The keywords are "+ keywords);
+		System.out.println("Events " + manager.getEvents());
+		System.out.println("The keywords are "+ manager.getKeywordsForEvent("Apple"));
 		System.out.println("The username is "+ twitterusername);
 		
 	}
