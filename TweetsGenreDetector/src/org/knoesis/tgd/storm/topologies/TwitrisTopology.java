@@ -34,9 +34,6 @@ public class TwitrisTopology {
 		// default folder data/event_keywords.properties
 		ConfigManager configParams = ConfigManager.getInstance();
 
-		// CreateHashMaps.createHashMaps("data/event_keywords");
-		// EventIdKeywordsGenerator eventKeywordsDataGenerator = new
-		// EventIdKeywordsGenerator("data/event_keywords.properties");
 		EventIdKeywordsGenerator eventKeywordsDataGenerator = new EventIdKeywordsGenerator(
 				configParams);
 		keywordsMap = eventKeywordsDataGenerator.getKeywordsMap();
@@ -66,9 +63,6 @@ public class TwitrisTopology {
 		builder.setBolt("3", new InsertTwitterDataToMongoBolt(), 1).shuffleGrouping("2");
 		log.debug("Done -- Bulding the Topology for Twitris Crawler");
 
-		// Adding the URLExtractorBolt here to insert URLs in the articles list
-		// builder.setBolt("3", new URLExtractorBolt(), 1).shuffleGrouping("1");
-
 		// Choose Local or Remote Deployment
 		boolean localMode = configParams.isClusterModeLocal();// true;
 		// LocalMode Deployment
@@ -80,16 +74,7 @@ public class TwitrisTopology {
 
 			// Setup the Local Cluster for Testing Purposes
 			LocalCluster cluster = new LocalCluster();
-
 			cluster.submitTopology("TwitrisTopology_new", conf, builder.createTopology());
-			// String emailaddress = "pramodkoneru549@gmail.com";
-			// Emailer mail2 = new Emailer(0,emailaddress
-			// ,"There is some error, so the crawler stopped. Please look into that!!!");
-			// mail2.start();
-
-			// Shut the Cluster Down after X Minutes.
-			// Utils.sleep( 6*60 *60 * 1000);
-			// cluster.shutdown();
 		}
 
 		// Remote Deployment
@@ -104,11 +89,6 @@ public class TwitrisTopology {
 				StormSubmitter
 						.submitTopology("TwitrisTopology_new", conf, builder.createTopology());
 			} catch (Exception e) {
-				// String emailaddress = "knoesiscrawler@gmail.com";
-				// Emailer mail2 = new Emailer(0,emailaddress
-				// ,"There is some error, so the crawler stopped. Please look into that!!!");
-				// mail2.start();
-				// return;
 				e.printStackTrace();
 			}
 		}
