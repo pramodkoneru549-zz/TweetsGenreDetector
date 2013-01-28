@@ -33,7 +33,7 @@ public class MongoDBHandler implements DBHandler {
 	private Mongo mongo= null;
 	private DB mongoDatabase = null;
 	private static Log log = LogFactory.getLog(MongoDBHandler.class);
-	
+
 	/**
 	 * Initiate the connection
 	 */
@@ -69,7 +69,9 @@ public class MongoDBHandler implements DBHandler {
 			dbObject.put("eventID" , tweet.getEvent());
 			dbObject.put("published_date",tweetStatus.getCreatedAt());
 			dbObject.put("twitter_author",getAuthorObject(tweetStatus.getUser())); //nested
-			dbObject.put("location",getLocationObject(tweet.getGeoLocation())); //nested field
+			BasicDBObject locationObject = (BasicDBObject) getLocationObject(tweet.getGeoLocation());
+			if(locationObject != null)
+				dbObject.put("location",locationObject); //nested field
 
 			if (tweetStatus.getInReplyToStatusId() > 0){
 				dbObject.put("reply_to_twitter_ID" , tweetStatus.getInReplyToStatusId());
@@ -93,7 +95,7 @@ public class MongoDBHandler implements DBHandler {
 		dbObject.put("twitter_text" , retweetStatus.getText());
 		dbObject.put("published_date",retweetStatus.getCreatedAt());
 		dbObject.put("twitter_author",getAuthorObject(retweetStatus.getUser())); //nested
-		dbObject.put("location",getLocationObject(retweetStatus.getGeoLocation())); //nested field
+//		dbObject.put("location",getLocationObject(retweetStatus.getGeoLocation())); //nested field
 		return dbObject;
 	}
 
@@ -112,9 +114,13 @@ public class MongoDBHandler implements DBHandler {
 	 * @return
 	 */
 	private DBObject getLocationObject(ATweetGeoLocation locationObj){
-		DBObject dbObject = new BasicDBObject();
-		dbObject.put("latitude", locationObj.getLatitude());
-		dbObject.put("longitude", locationObj.getLongitude());
+		DBObject dbObject = null;
+		//		new BasicDBObject();
+		if(locationObj.getLatitude() == 0.0 || locationObj.getLongitude() == 0.0){
+			dbObject = new BasicDBObject();
+			dbObject.put("latitude", locationObj.getLatitude());
+			dbObject.put("longitude", locationObj.getLongitude());
+		}
 		return dbObject;
 	}
 
@@ -126,7 +132,6 @@ public class MongoDBHandler implements DBHandler {
 	private DBObject getAuthorObject(User user){
 		DBObject dbObject = new BasicDBObject();
 		dbObject.put("screen_name", user.getScreenName());
-
 		return dbObject;
 	}
 	@Override
@@ -182,7 +187,13 @@ public class MongoDBHandler implements DBHandler {
 	@Override
 	public void cleanup() {
 		// TODO Auto-generated method stub
+	}
 
+	/**
+	 * Method to close mongo connection
+	 */
+	public void closeConnection(){
+		mongo.close();
 	}
 
 }

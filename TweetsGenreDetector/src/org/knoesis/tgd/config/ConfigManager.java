@@ -111,6 +111,19 @@ public class ConfigManager {
 		}
 		return wordSet;
 	}
+	
+	public boolean isClusterModeLocal(){
+		boolean clusterMode = Boolean.parseBoolean(properties.getProperty("isClusterModeLocal"));
+		return clusterMode;
+	}
+	
+	public String getTwitterUsername(){
+		return properties.getProperty("twitterusername");
+	}
+	
+	public String getTwitterPassword(){
+		return properties.getProperty("twitterpassword");
+	}
 
 	public static void main(String[] args) {
 		ConfigManager manager = ConfigManager.getInstance();
@@ -119,6 +132,6 @@ public class ConfigManager {
 		System.out.println("Events " + manager.getEvents());
 		System.out.println("The keywords are "+ manager.getKeywordsForEvent("Apple"));
 		System.out.println("The username is "+ twitterusername);
-		
+		System.out.println("Mode is " + manager.isClusterModeLocal());
 	}
 }
