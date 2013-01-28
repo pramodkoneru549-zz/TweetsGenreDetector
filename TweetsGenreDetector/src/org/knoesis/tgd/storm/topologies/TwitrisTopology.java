@@ -26,7 +26,7 @@ public class TwitrisTopology {
 	static Map<Set<String>, String> keywordEventMap = new HashMap<Set<String>, String>();
 
 	// List to store all the keywords for the file, for the streaming API to
-	// crawl for the tweets.
+	// crawl for the tweets.Á
 	static ArrayList<String> totalkeywords = new ArrayList<String>();
 
 	public static void main(String[] args) {

@@ -70,16 +70,16 @@ public class MongoDBHandler implements DBHandler {
 
 			HashtagEntity[] hashtagEntities = tweetStatus.getHashtagEntities();
 			ArrayList<String> hashtags = getHashtagEntities(hashtagEntities);
-			
+
 			if(hashtags != null){
 				dbObject.put("hashtags", hashtags);
 			}
-			
+
 			ArrayList<DBObject> urlEntityObjects = getURLEntitiesObjects(tweetStatus.getURLEntities());
 			if(urlEntityObjects != null){
 				dbObject.put("urls", urlEntityObjects);
 			}
-			
+
 			ArrayList<DBObject> userMentionEntityObjects = getUserMentionEntitiesObjects(tweetStatus.getUserMentionEntities());
 			if(userMentionEntityObjects != null){
 				dbObject.put("user_mentions", userMentionEntityObjects);
@@ -128,7 +128,7 @@ public class MongoDBHandler implements DBHandler {
 		}
 		return hashtags;
 	}
-	
+
 	/**
 	 * This method takes in the twitter4j URLENtities and returns list of 
 	 * urlDBObjects for insertion into MongoDb
@@ -145,15 +145,15 @@ public class MongoDBHandler implements DBHandler {
 			for (int i = 0; i < urlEntities.length; i++) {
 				URLEntity urlEntity = urlEntities[i];
 				DBObject urlObject = new BasicDBObject();
-				urlObject.put("url", urlEntity.getURL());
-				urlObject.put("display_url", urlEntity.getDisplayURL());
-				urlObject.put("expanded_url", urlEntity.getExpandedURL());
+				urlObject.put("url", urlEntity.getURL().toString());
+				urlObject.put("display_url", urlEntity.getDisplayURL().toString());
+				urlObject.put("expanded_url", urlEntity.getExpandedURL().toString());
 				urlEntitiesObjects.add(urlObject);
 			}
 		}
 		return urlEntitiesObjects;
 	}
-	
+
 	/**
 	 * This method takes in the twitter4j UserMentionEtities and returns list of 
 	 * userMentionDBObjects for insertion into MongoDb
@@ -223,7 +223,9 @@ public class MongoDBHandler implements DBHandler {
 		DBObject dbObject = new BasicDBObject();
 		dbObject.put("screen_name", user.getScreenName());
 		dbObject.put("name", user.getName());
-		dbObject.put("url", user.getURL());
+//		String url = user.getURL().toString();
+//		if(url != null)
+//			dbObject.put("url", url);
 		dbObject.put("created_at", user.getCreatedAt());
 		dbObject.put("favourites_count", user.getFavouritesCount());
 		dbObject.put("followers_count", user.getFollowersCount());
