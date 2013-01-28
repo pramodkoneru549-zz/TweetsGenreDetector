@@ -39,7 +39,6 @@ public class LocationFetcher implements Extractor<Object>{
 	public void process(AnnotatedTweet tweet) {
 		Status status = tweet.getStatusTweet();
 		GeoLocation location = status.getGeoLocation();
-
 		// Collecting Tweet Content to get eventID from the tweet
 //		String tweettext = status.getText();
 //		String authorLocation = status.getUser().getLocation();
@@ -50,6 +49,7 @@ public class LocationFetcher implements Extractor<Object>{
 		 * table to see if it has author location, if not decode the location.
 		 */
 		if (location != null) {
+			System.out.println("Location is not null");
 			tweet.getGeoLocation().setLatitude((float) location.getLatitude());
 			tweet.getGeoLocation().setLongitude((float) location.getLongitude());
 		}

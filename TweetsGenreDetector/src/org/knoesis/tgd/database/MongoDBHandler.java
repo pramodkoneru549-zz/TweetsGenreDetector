@@ -11,8 +11,11 @@ import org.knoesis.twarql.models.AnnotatedTweet;
 import org.knoesis.tgd.config.ConfigManager;
 
 import twitter4j.GeoLocation;
+import twitter4j.HashtagEntity;
 import twitter4j.Status;
+import twitter4j.URLEntity;
 import twitter4j.User;
+import twitter4j.UserMentionEntity;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
@@ -55,6 +58,7 @@ public class MongoDBHandler implements DBHandler {
 
 	/**
 	 * This method given it the list of annotated tweets enters that data into Mongo DB
+	 * FIXME Have to still modularize move the object creation to another method
 	 */
 	public void batchInsertTwitterData(List<AnnotatedTweet> aTweets) {
 
@@ -63,6 +67,23 @@ public class MongoDBHandler implements DBHandler {
 		for (AnnotatedTweet tweet : aTweets) {
 			DBObject dbObject = new BasicDBObject();
 			Status tweetStatus = tweet.getStatusTweet();
+
+			HashtagEntity[] hashtagEntities = tweetStatus.getHashtagEntities();
+			ArrayList<String> hashtags = getHashtagEntities(hashtagEntities);
+			
+			if(hashtags != null){
+				dbObject.put("hashtags", hashtags);
+			}
+			
+			ArrayList<DBObject> urlEntityObjects = getURLEntitiesObjects(tweetStatus.getURLEntities());
+			if(urlEntityObjects != null){
+				dbObject.put("urls", urlEntityObjects);
+			}
+			
+			ArrayList<DBObject> userMentionEntityObjects = getUserMentionEntitiesObjects(tweetStatus.getUserMentionEntities());
+			if(userMentionEntityObjects != null){
+				dbObject.put("user_mentions", userMentionEntityObjects);
+			}
 			//`twitter_ID`, `tweet_text`, `eventID`, `published_date`,`twitter_author`, `latitude`, `longitude`
 			dbObject.put("twitter_id" , tweetStatus.getId());
 			dbObject.put("twitter_text" , tweetStatus.getText());
@@ -89,13 +110,82 @@ public class MongoDBHandler implements DBHandler {
 
 	}
 
+	/**
+	 * This method take in twitter4j HashtagEntities, gets just the hashtags from them
+	 * and returns an arrayList of hashtags. Returns null if there are no hashtagentities
+	 * @param hashTagEntites
+	 * @return
+	 */
+	private ArrayList<String> getHashtagEntities(HashtagEntity[] hashTagEntites){
+		ArrayList<String> hashtags = null;
+		int noOfHashtagEntities = hashTagEntites.length;
+		if(noOfHashtagEntities > 0){
+			hashtags = new ArrayList<String>();
+			for (int i = 0; i < noOfHashtagEntities; i++) {
+				HashtagEntity hashtagEntity = hashTagEntites[i];
+				hashtags.add(hashtagEntity.getText());
+			}
+		}
+		return hashtags;
+	}
+	
+	/**
+	 * This method takes in the twitter4j URLENtities and returns list of 
+	 * urlDBObjects for insertion into MongoDb
+	 * NOTE: Here only required fields are taken. Refer twiiter4j to know 
+	 *       about all other fields available.
+	 * @param urlEntities
+	 * @return
+	 */
+	private ArrayList<DBObject> getURLEntitiesObjects(URLEntity[] urlEntities){
+		ArrayList<DBObject> urlEntitiesObjects = null;
+		int noOfUrlEntities = urlEntities.length;
+		if(noOfUrlEntities > 0){
+			urlEntitiesObjects = new ArrayList<DBObject>();
+			for (int i = 0; i < urlEntities.length; i++) {
+				URLEntity urlEntity = urlEntities[i];
+				DBObject urlObject = new BasicDBObject();
+				urlObject.put("url", urlEntity.getURL());
+				urlObject.put("display_url", urlEntity.getDisplayURL());
+				urlObject.put("expanded_url", urlEntity.getExpandedURL());
+				urlEntitiesObjects.add(urlObject);
+			}
+		}
+		return urlEntitiesObjects;
+	}
+	
+	/**
+	 * This method takes in the twitter4j UserMentionEtities and returns list of 
+	 * userMentionDBObjects for insertion into MongoDb
+	 * NOTE: Here only required fields are taken. Refer twiiter4j to know 
+	 *       about all other fields available.
+	 * @param userMentionEntities
+	 * @return
+	 */
+	private ArrayList<DBObject> getUserMentionEntitiesObjects(UserMentionEntity[] userMentionEntities){
+		ArrayList<DBObject> userMentionObjects = null;
+		int noOfUserMentionEntities = userMentionEntities.length;
+		if(noOfUserMentionEntities > 0){
+			userMentionObjects = new ArrayList<DBObject>();
+			for (int i = 0; i < userMentionEntities.length; i++) {
+				UserMentionEntity userMentionEntity = userMentionEntities[i];
+				DBObject userMentionObject = new BasicDBObject();
+				userMentionObject.put("id", userMentionEntity.getId());
+				userMentionObject.put("screen_name", userMentionEntity.getScreenName());
+				userMentionObject.put("name", userMentionEntity.getName());
+				userMentionObjects.add(userMentionObject);
+			}
+		}
+		return userMentionObjects;
+	}
+
 	private DBObject getRetweetObject(Status retweetStatus){
 		DBObject dbObject = new BasicDBObject();
 		dbObject.put("twitter_id" , retweetStatus.getId());
 		dbObject.put("twitter_text" , retweetStatus.getText());
 		dbObject.put("published_date",retweetStatus.getCreatedAt());
 		dbObject.put("twitter_author",getAuthorObject(retweetStatus.getUser())); //nested
-//		dbObject.put("location",getLocationObject(retweetStatus.getGeoLocation())); //nested field
+		//		dbObject.put("location",getLocationObject(retweetStatus.getGeoLocation())); //nested field
 		return dbObject;
 	}
 
@@ -132,6 +222,14 @@ public class MongoDBHandler implements DBHandler {
 	private DBObject getAuthorObject(User user){
 		DBObject dbObject = new BasicDBObject();
 		dbObject.put("screen_name", user.getScreenName());
+		dbObject.put("name", user.getName());
+		dbObject.put("url", user.getURL());
+		dbObject.put("created_at", user.getCreatedAt());
+		dbObject.put("favourites_count", user.getFavouritesCount());
+		dbObject.put("followers_count", user.getFollowersCount());
+		dbObject.put("friends_count", user.getFriendsCount());
+		dbObject.put("id", user.getId());
+		dbObject.put("location", user.getLocation());
 		return dbObject;
 	}
 	@Override

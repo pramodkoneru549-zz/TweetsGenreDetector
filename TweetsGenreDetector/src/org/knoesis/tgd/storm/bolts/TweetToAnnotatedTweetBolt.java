@@ -1,22 +1,13 @@
 package org.knoesis.tgd.storm.bolts;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.knoesis.tgd.database.MongoDBHandler;
 import org.knoesis.tgd.extractors.LocationFetcher;
 import org.knoesis.twarql.models.AnnotatedTweet;
 
@@ -46,7 +37,7 @@ public class TweetToAnnotatedTweetBolt implements IRichBolt{
 	private static final long serialVersionUID = 1L;
 	private static LocationFetcher locationFetcher;
 	private OutputCollector _collector;
-	private MongoDBHandler dbHandler;
+	
 	@Override
 	public void cleanup() {
 
@@ -65,7 +56,6 @@ public class TweetToAnnotatedTweetBolt implements IRichBolt{
 	public void prepare(Map stormConf, TopologyContext context,
 			OutputCollector collector) {
 		_collector = collector;
-		dbHandler = new MongoDBHandler();
 		
 	}
 
