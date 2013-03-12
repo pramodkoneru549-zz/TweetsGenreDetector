@@ -64,22 +64,25 @@ public class MongoDBHandler implements DBHandler {
 
 		DBCollection collection = mongoDatabase.getCollection("tweets");
 		List<DBObject> objectList = new ArrayList<DBObject>();
+		
 		for (AnnotatedTweet tweet : aTweets) {
 			DBObject dbObject = new BasicDBObject();
 			Status tweetStatus = tweet.getStatusTweet();
-
+			
+			// Getting hashtags
 			HashtagEntity[] hashtagEntities = tweetStatus.getHashtagEntities();
 			ArrayList<String> hashtags = getHashtagEntities(hashtagEntities);
-
 			if(hashtags != null){
 				dbObject.put("hashtags", hashtags);
 			}
-
+			
+			// Getting URL Objects
 			ArrayList<DBObject> urlEntityObjects = getURLEntitiesObjects(tweetStatus.getURLEntities());
 			if(urlEntityObjects != null){
 				dbObject.put("urls", urlEntityObjects);
 			}
-
+			
+			// Getting userMentions
 			ArrayList<DBObject> userMentionEntityObjects = getUserMentionEntitiesObjects(tweetStatus.getUserMentionEntities());
 			if(userMentionEntityObjects != null){
 				dbObject.put("user_mentions", userMentionEntityObjects);
@@ -90,6 +93,7 @@ public class MongoDBHandler implements DBHandler {
 			dbObject.put("eventID" , tweet.getEvent());
 			dbObject.put("published_date",tweetStatus.getCreatedAt());
 			dbObject.put("twitter_author",getAuthorObject(tweetStatus.getUser())); //nested
+			
 			BasicDBObject locationObject = (BasicDBObject) getLocationObject(tweet.getGeoLocation());
 			if(locationObject != null)
 				dbObject.put("location",locationObject); //nested field
@@ -206,7 +210,7 @@ public class MongoDBHandler implements DBHandler {
 	private DBObject getLocationObject(ATweetGeoLocation locationObj){
 		DBObject dbObject = null;
 		//		new BasicDBObject();
-		if(locationObj.getLatitude() == 0.0 || locationObj.getLongitude() == 0.0){
+		if(locationObj.getLatitude() != 10000 || locationObj.getLongitude() != 10000){
 			dbObject = new BasicDBObject();
 			dbObject.put("latitude", locationObj.getLatitude());
 			dbObject.put("longitude", locationObj.getLongitude());
